@@ -1,31 +1,32 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-
+import {RotateCw } from 'lucide-react';
 export default function AdminTeams() {
   const [q, setQ] = useState('');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
   const [modalTeam, setModalTeam] = useState(null); // which team is open in modal
+  const [modalSolution, setModalSolution] = useState(null);
+  const [solutionsByTeam, setSolutionsByTeam] = useState({});
 
   async function load() {
     setLoading(true);
     setMsg('');
-    const { data, error } = await supabase
+    // Load teams + members
+    const { data: teams, error } = await supabase
       .from('teams')
       .select(`
-        id,
-        created_by,
-        created_at,
-        team_members (*)
-      `)
+      id,
+      created_by,
+      created_at,
+      team_members (*)
+    `)
       .order('created_at', { ascending: false })
       .limit(1000);
 
-    setLoading(false);
-    if (error) { setMsg(error.message); return; }
-
-    const list = (data || []).map(t => ({
+    if (error) { setMsg(error.message); setLoading(false); return; }
+    const list = (teams || []).map(t => ({
       ...t,
       team_members: (t.team_members || []).slice().sort((a, b) => {
         const ax = a?.joined_at ? new Date(a.joined_at).getTime() : 0;
@@ -34,7 +35,20 @@ export default function AdminTeams() {
       })
     }));
     setItems(list);
+
+    // Fetch solutions in a single query!
+    const { data: sols, error: solErr } = await supabase
+      .from('solutions')
+      .select('*');
+    if (!solErr && sols) {
+      // Map: { team_id: solution, ... }
+      const map = {};
+      sols.forEach(sol => { if (sol.team_id) map[sol.team_id] = sol; });
+      setSolutionsByTeam(map);
+    }
+    setLoading(false);
   }
+
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
 
@@ -69,7 +83,7 @@ export default function AdminTeams() {
           onChange={e => setQ(e.target.value)}
           style={{ maxWidth: 420 }}
         />
-        <button className="c_admin-btn" onClick={load} style={{ marginLeft: 8 }}>Reload</button>
+        <button className="c_admin-btn-reload" onClick={load} ><RotateCw /></button>
       </div>
 
       {msg && <div className="c_admin-alert">{msg}</div>}
@@ -87,24 +101,39 @@ export default function AdminTeams() {
           </div>
 
           <div className="c_admin-tbody">
-            {filtered.map(team => (
+            {filtered.map((team,index) => (
               <div key={team.id} className="c_admin-rowline">
                 <div className="c_admin-grid">
-                  <div className="c_admin-cell"><code className="c_admin-code">{team.id}</code></div>
-                  <div className="c_admin-cell">{fmt(team.created_at)}</div>
+                  <div className="c_admin-cell"><code className="c_admin-code">{index + 1}</code></div>
+                  <div className="c_admin-cell">{fmt(team.created_at)   }</div>
                   <div className="c_admin-cell c--actions">
-                    <button className="c_admin-btn c_admin-btn--ghost" onClick={() => setModalTeam(team)}>
+                    <button className="c_admin-btn c_admin-btn--rost" onClick={() => setModalTeam(team)}>
                       View members
                     </button>
                   </div>
+                  <div>
+                     {solutionsByTeam[team.id] && (
+                    <button
+                      className="c_admin-btn c_admin-btn--rost"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => setModalSolution(solutionsByTeam[team.id])}
+                    >
+                      View Solution
+                    </button>
+                  )}
+                  </div>
                 </div>
+               
               </div>
             ))}
           </div>
+
         </div>
       )}
 
       <MembersModal team={modalTeam} onClose={() => setModalTeam(null)} />
+      <SolutionModal solution={modalSolution} onClose={() => setModalSolution(null)} />
+
     </div>
   );
 }
@@ -156,7 +185,6 @@ function MembersModal({ team, onClose }) {
               <b>Created at:</b> {fmt(team.created_at)}
             </div>
           </div>
-          <button className="c_admin-btn" onClick={onClose}>Close</button>
         </header>
 
         <section className="c_modal-body">
@@ -206,33 +234,33 @@ function MemberDetail({ member }) {
     if (!v) return '—';
     const s = String(v);
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-      const [y,m,d] = s.split('-');
+      const [y, m, d] = s.split('-');
       return `${d}/${m}/${y}`;
     }
     try {
-      return new Date(s).toLocaleDateString('en-IN', { day:'2-digit', month:'2-digit', year:'numeric' });
+      return new Date(s).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch { return s; }
   };
 
   const labelMap = {
-    member_name:'Name', member_email:'Email', member_phone:'Phone',
-    age:'Age', gender:'Gender', dob:'Date of Birth',
-    is_student:'Student', institute_name:'Institute',
-    course:'Course', current_year:'Current Year', cgpa:'CGPA',
-    state_name:'State', city_name:'City', programs_known:'Programs Known',
-    preferred_track:'Preferred Track', problem_statement_preference:'Problem Preference',
-    previous_projects:'Previous Projects', motivation:'Motivation',
-    ai_ml_experience_level:'AI/ML Experience', need_accommodation:'Need Accommodation',
-    joined_at:'Joined At'
+    member_name: 'Name', member_email: 'Email', member_phone: 'Phone',
+    age: 'Age', gender: 'Gender', dob: 'Date of Birth',
+    is_student: 'Student', institute_name: 'Institute',
+    course: 'Course', current_year: 'Current Year', cgpa: 'CGPA',
+    state_name: 'State', city_name: 'City', programs_known: 'Programs Known',
+    preferred_track: 'Preferred Track', problem_statement_preference: 'Problem Preference',
+    previous_projects: 'Previous Projects', motivation: 'Motivation',
+    ai_ml_experience_level: 'AI/ML Experience', need_accommodation: 'Need Accommodation',
+    joined_at: 'Joined At'
   };
 
   const order = [
-    'member_name','member_email','member_phone',
-    'age','gender','dob',
-    'is_student','institute_name','course','current_year','cgpa',
-    'state_name','city_name','programs_known',
-    'preferred_track','problem_statement_preference','previous_projects','motivation',
-    'ai_ml_experience_level','need_accommodation','joined_at'
+    'member_name', 'member_email', 'member_phone',
+    'age', 'gender', 'dob',
+    'is_student', 'institute_name', 'course', 'current_year', 'cgpa',
+    'state_name', 'city_name', 'programs_known',
+    'preferred_track', 'problem_statement_preference', 'previous_projects', 'motivation',
+    'ai_ml_experience_level', 'need_accommodation', 'joined_at'
   ];
 
   const stringify = (k, v) => {
@@ -266,6 +294,54 @@ function MemberDetail({ member }) {
             <div className="c_modal-kv__v">{v}</div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+
+function SolutionModal({ solution, onClose }) {
+  if (!solution) return null;
+
+  function stop(e) { e.stopPropagation(); }
+
+  return (
+    <div className="c_modal-backdrop" onMouseDown={onClose}>
+      <div className="c_modal" style={{ maxWidth: 600 }} role="dialog" aria-modal="true" onMouseDown={stop}>
+        <header className="c_modal-head">
+          <div>
+            <div className="c_modal-title">Team Solution</div>
+            <div className="c_modal-sub">
+              <b>Team ID:</b> <code className="c_admin-code">{solution.team_id}</code>
+            </div>
+          </div>
+        </header>
+        <section className="c_modal-body" style={{ flexDirection: "column", minHeight: 0 }}>
+          <div style={{ padding: 16 }}>
+            <div style={{ fontWeight: 500, color: '#424242ff', marginBottom: 10 }}>
+              {solution.description}
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <b>GitHub:</b> <a href={solution.github_url} target="_blank" rel="noopener noreferrer">{solution.github_url}</a>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <b>Documentation:</b> <a href={solution.doc_url} target="_blank" rel="noopener noreferrer">{solution.doc_url}</a>
+            </div>
+            {solution.video_url && (
+              <div style={{ marginBottom: 8 }}>
+                <b>Video Demo:</b> <a href={solution.video_url} target="_blank" rel="noopener noreferrer">{solution.video_url}</a>
+              </div>
+            )}
+            {solution.project_url && (
+              <div style={{ marginBottom: 8 }}>
+                <b>Project Link:</b> <a href={solution.project_url} target="_blank" rel="noopener noreferrer">{solution.project_url}</a>
+              </div>
+            )}
+            <div style={{ marginTop: 14, color: '#666', fontSize: '0.95em' }}>
+              <b>Submitted At:</b> {solution.submitted_at ? new Date(solution.submitted_at).toLocaleString('en-IN') : '—'}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

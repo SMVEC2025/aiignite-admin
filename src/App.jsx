@@ -11,6 +11,7 @@ import './styles/Admin.scss';
 import Teams from './pages/Teams';
 import TeamDetail from './pages/TeamDetails';
 import MemberDetail from './pages/MemberDetail';
+import Sessions from './pages/Sessions';
 
 export default function App() {
   return (
@@ -32,6 +33,8 @@ export default function App() {
                     <Route path="/teams" element={<Teams />} />
                     <Route path="/teams/:teamId" element={<TeamDetail />} />
                     <Route path="/teams/:teamId/members/:memberId" element={<MemberDetail />} />
+                    <Route path="/sessions" element={<Sessions />} />
+
                   </Routes>
                 </main>
               </div>
