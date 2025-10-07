@@ -12,6 +12,7 @@ import Teams from './pages/Teams';
 import TeamDetail from './pages/TeamDetails';
 import MemberDetail from './pages/MemberDetail';
 import Sessions from './pages/Sessions';
+import PushNotification from './pages/PushNotification';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
                     <Route path="/teams/:teamId" element={<TeamDetail />} />
                     <Route path="/teams/:teamId/members/:memberId" element={<MemberDetail />} />
                     <Route path="/sessions" element={<Sessions />} />
+                    <Route path="/push-notification" element={<PushNotification />} />
 
                   </Routes>
                 </main>
