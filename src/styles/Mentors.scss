@@ -1,0 +1,570 @@
+// Mentors.scss
+
+// Theme variables (from your template)
+$c-primary: #01a79d !default;
+$c-primary-600: #01a79d !default;
+$c-bg: #0f1115 !default;
+$c-card: #151821 !default;
+$c-text: #e5e7eb !default;
+$c-dim: #a3a7b3 !default;
+$c-border: #262a36 !default;
+$c-success: #22c55e !default;
+$c-danger: #ef4444 !default;
+
+// Small helpers
+$radius-lg: 1rem;
+$radius-md: 0.7rem;
+$radius-pill: 999px;
+$shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
+
+.admin-mentor-page {
+  min-height: 100vh;
+  padding: 2rem 1.5rem 3rem;
+  background: radial-gradient(circle at top, #171b24 0, $c-bg 45%);
+  color: $c-text;
+
+  @media (min-width: 900px) {
+    padding: 2.5rem 4rem 4rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: $c-text;
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: $c-text;
+    margin: 1.5rem 0 1rem;
+  }
+
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $c-text;
+    margin-bottom: 0.25rem;
+  }
+
+  h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $c-text;
+    margin-bottom: 0.75rem;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid rgba($c-border, 0.8);
+    margin: 2rem 0;
+  }
+
+  .error-text {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: rgba($c-danger, 0.12);
+    color: $c-danger;
+    font-size: 0.9rem;
+    border: 1px solid rgba($c-danger, 0.5);
+  }
+
+  // CREATE MENTOR FORM
+  .admin-mentor-form {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 1.75rem 1.5rem 1.5rem;
+    border-radius: $radius-lg;
+    background: $c-card;
+    box-shadow: $shadow-soft;
+    border: 1px solid $c-border;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+    overflow: hidden;
+
+    @media (min-width: 900px) {
+      padding: 2rem 2rem 1.75rem;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba($c-primary, 0.15), transparent 55%),
+        radial-gradient(circle at bottom right, rgba($c-primary, 0.06), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: $c-dim;
+      }
+
+      input {
+        height: 2.6rem;
+        padding: 0 0.75rem;
+        border-radius: 0.55rem;
+        border: 1px solid $c-border;
+        font-size: 0.95rem;
+        color: $c-text;
+        background-color: #10131b;
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease,
+          background-color 0.15s ease;
+
+        &:focus {
+          outline: none;
+          border-color: $c-primary;
+          background-color: #0c0f16;
+          box-shadow: 0 0 0 1px rgba($c-primary, 0.55);
+        }
+
+        &::placeholder {
+          color: rgba($c-dim, 0.65);
+        }
+      }
+    }
+
+    .slots-section {
+      margin-top: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba($c-border, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .slots-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1rem;
+        justify-content: space-between;
+
+        h3 {
+          margin: 0;
+          font-size: 1.05rem;
+        }
+
+        .slots-subtitle {
+          flex: 1 1 250px;
+          margin: 0;
+          font-size: 0.85rem;
+          color: $c-dim;
+        }
+
+        .add-slot-btn {
+          @extend .primary-btn;
+          padding: 0.4rem 0.95rem;
+          font-size: 0.85rem;
+          background: linear-gradient(135deg, lighten($c-primary, 5%), $c-primary);
+          border-color: lighten($c-primary, 10%);
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, lighten($c-primary, 10%), lighten($c-primary, 2%));
+          }
+        }
+      }
+
+      .slot-row {
+        margin-top: 0.4rem;
+        padding: 0.85rem 0.85rem;
+        border-radius: 0.75rem;
+        border: 1px solid $c-border;
+        background: #10131b;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+
+        @media (min-width: 720px) {
+          grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+          align-items: flex-end;
+        }
+
+        .slot-field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
+
+          label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: $c-dim;
+          }
+
+          input {
+            height: 2.4rem;
+            padding: 0 0.65rem;
+            border-radius: 0.55rem;
+            border: 1px solid $c-border;
+            background: $c-bg;
+            font-size: 0.9rem;
+            color: $c-text;
+
+            &:focus {
+              outline: none;
+              border-color: $c-primary;
+              box-shadow: 0 0 0 1px rgba($c-primary, 0.45);
+            }
+          }
+        }
+
+        .remove-slot-btn {
+          align-self: center;
+          justify-self: flex-start;
+          border: none;
+          border-radius: $radius-pill;
+          width: 2.3rem;
+          height: 2.3rem;
+          font-size: 1.1rem;
+          cursor: pointer;
+          background: rgba($c-danger, 0.18);
+          color: $c-danger;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition:
+            background-color 0.15s ease,
+            transform 0.08s ease;
+
+          @media (min-width: 720px) {
+            justify-self: flex-end;
+          }
+
+          &:hover {
+            background: rgba($c-danger, 0.28);
+            transform: translateY(-1px);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+      }
+    }
+
+    .primary-btn {
+      align-self: flex-end;
+      margin-top: 0.5rem;
+    }
+  }
+
+  // Shared Buttons
+  .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.35rem;
+    border-radius: $radius-md;
+    border: 1px solid $c-primary-600;
+    background: linear-gradient(135deg, $c-primary-600, darken($c-primary-600, 6%));
+    color: #081016;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.08s ease;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, lighten($c-primary-600, 5%), $c-primary-600);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+  }
+
+  .slot-save-btn,
+  .slot-cancel-btn,
+  .slot-edit-btn,
+  .slot-delete-btn {
+    border-radius: $radius-pill;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .slot-save-btn {
+    background: rgba($c-success, 0.16);
+    border-color: rgba($c-success, 0.6);
+    color: $c-success;
+
+    &:hover:not(:disabled) {
+      background: rgba($c-success, 0.25);
+    }
+  }
+
+  .slot-cancel-btn {
+    background: #191d27;
+    border-color: $c-border;
+    color: $c-dim;
+    margin-left: 0.4rem;
+
+    &:hover {
+      background: #1d212b;
+    }
+  }
+
+  .slot-edit-btn {
+    background: rgba($c-primary, 0.12);
+    border-color: rgba($c-primary, 0.45);
+    color: $c-primary;
+    margin-left: 0.5rem;
+
+    &:hover {
+      background: rgba($c-primary, 0.2);
+    }
+  }
+
+  .slot-delete-btn {
+    background: rgba($c-danger, 0.1);
+    border-color: rgba($c-danger, 0.5);
+    color: $c-danger;
+    margin-left: 0.3rem;
+
+    &:hover:not(:disabled) {
+      background: rgba($c-danger, 0.2);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  .slot-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: $radius-pill;
+    padding: 0.05rem 0.55rem;
+    margin-left: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    background: rgba($c-primary, 0.12);
+    color: $c-primary;
+    border: 1px solid rgba($c-primary, 0.5);
+  }
+
+  // EXISTING MENTORS LIST
+  .mentor-list {
+    margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+
+    @media (min-width: 900px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: $c-dim;
+    }
+
+    .mentor-card {
+      border-radius: $radius-lg;
+      background: $c-card;
+      border: 1px solid $c-border;
+      box-shadow: $shadow-soft;
+      padding: 1.25rem 1.15rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at top left, rgba($c-primary, 0.18), transparent 55%),
+          radial-gradient(circle at bottom right, rgba($c-primary, 0.05), transparent 55%);
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .mentor-designation {
+        font-size: 0.85rem;
+        color: $c-dim;
+        margin-bottom: 0.2rem;
+      }
+
+      .no-slots {
+        font-size: 0.85rem;
+        color: rgba($c-dim, 0.8);
+        font-style: italic;
+      }
+
+      .slot-list {
+        list-style: none;
+        margin: 0.3rem 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+
+        .slot-list-item {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.45rem;
+          padding: 0.4rem 0.55rem;
+          border-radius: 0.6rem;
+          background: #10141c;
+          border: 1px solid $c-border;
+          font-size: 0.85rem;
+          color: $c-text;
+
+          span {
+            font-variant-numeric: tabular-nums;
+          }
+
+          input[type="date"],
+          input[type="time"] {
+            height: 2.1rem;
+            padding: 0 0.55rem;
+            border-radius: 0.4rem;
+            border: 1px solid $c-border;
+            font-size: 0.8rem;
+            background: $c-bg;
+            color: $c-text;
+
+            &:focus {
+              outline: none;
+              border-color: $c-primary;
+              box-shadow: 0 0 0 1px rgba($c-primary, 0.45);
+            }
+          }
+        }
+      }
+
+      .mentor-add-slot {
+        margin-top: 0.4rem;
+        padding-top: 0.7rem;
+        border-top: 1px dashed rgba($c-border, 0.9);
+
+        .slot-row {
+          margin-top: 0.3rem;
+          padding: 0.6rem 0.6rem 0.55rem;
+          border-radius: 0.7rem;
+          background: #10131b;
+          border: 1px solid $c-border;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+
+          @media (min-width: 720px) {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+            align-items: flex-end;
+          }
+
+          .slot-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+
+            label {
+              font-size: 0.78rem;
+              font-weight: 500;
+              color: $c-dim;
+            }
+
+            input {
+              height: 2.2rem;
+              padding: 0 0.55rem;
+              border-radius: 0.45rem;
+              border: 1px solid $c-border;
+              font-size: 0.85rem;
+              background: $c-bg;
+              color: $c-text;
+
+              &:focus {
+                outline: none;
+                border-color: $c-primary;
+                box-shadow: 0 0 0 1px rgba($c-primary, 0.45);
+              }
+            }
+          }
+
+          .add-slot-btn {
+            align-self: center;
+            justify-self: flex-start;
+            padding: 0.45rem 1rem;
+            border-radius: 0.7rem;
+            border: 1px solid $c-primary-600;
+            background: linear-gradient(135deg, $c-primary-600, darken($c-primary-600, 5%));
+            color: #081016;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition:
+              background-color 0.15s ease,
+              box-shadow 0.15s ease,
+              transform 0.08s ease;
+            white-space: nowrap;
+
+            @media (min-width: 720px) {
+              justify-self: flex-end;
+            }
+
+            &:hover:not(:disabled) {
+              background: linear-gradient(135deg, lighten($c-primary-600, 4%), $c-primary-600);
+              box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6);
+              transform: translateY(-1px);
+            }
+
+            &:disabled {
+              opacity: 0.7;
+              cursor: default;
+              box-shadow: none;
+            }
+          }
+        }
+      }
+    }
+  }
+}

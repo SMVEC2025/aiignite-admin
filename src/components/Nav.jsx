@@ -1,7 +1,7 @@
 // src/components/Nav.jsx
 import { NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import {LogOut} from 'lucide-react';
+import { LogOut } from 'lucide-react';
 export default function Nav() {
   const nav = useNavigate();
   async function signOut() {
@@ -17,9 +17,10 @@ export default function Nav() {
         <NavLink to="/members" className="c_admin-link">Members</NavLink>
         <NavLink to="/announcements" className="c_admin-link">Announcements</NavLink>
         <NavLink to="/timeline" className="c_admin-link">Timeline</NavLink>
+        <NavLink to="/mentors" className="c_admin-link">Mentors</NavLink>
         <NavLink to="/sessions" className="c_admin-link">Sessions</NavLink>
       </div>
-      <button id='log-out' style={{border:'none'}} className="c_admin-btn c_admin-btn--ghost" onClick={signOut}><LogOut size={20}/></button>
+      <button id='log-out' style={{ border: 'none' }} className="c_admin-btn c_admin-btn--ghost" onClick={signOut}><LogOut size={20} /></button>
     </nav>
   );
 }
