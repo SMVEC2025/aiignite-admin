@@ -18,6 +18,7 @@ export default function Nav() {
         <NavLink to="/announcements" className="c_admin-link">Announcements</NavLink>
         <NavLink to="/timeline" className="c_admin-link">Timeline</NavLink>
         <NavLink to="/mentors" className="c_admin-link">Mentors</NavLink>
+        <NavLink to="/mentoring-sessions" className="c_admin-link">Mentors-sessions</NavLink>
         <NavLink to="/sessions" className="c_admin-link">Sessions</NavLink>
       </div>
       <button id='log-out' style={{ border: 'none' }} className="c_admin-btn c_admin-btn--ghost" onClick={signOut}><LogOut size={20} /></button>

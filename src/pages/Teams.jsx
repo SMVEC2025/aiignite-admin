@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import {RotateCw } from 'lucide-react';
+import { RotateCw } from 'lucide-react';
 export default function AdminTeams() {
   const [q, setQ] = useState('');
   const [items, setItems] = useState([]);
@@ -69,7 +69,31 @@ export default function AdminTeams() {
     });
   }, [q, items]);
 
-  const fmt = (dt) => { try { return new Date(dt).toLocaleString('en-IN'); } catch { return dt || ''; } };
+  const fmt = (dt) => {
+    try {
+      const d = new Date(dt);
+      if (Number.isNaN(d.getTime())) return dt || "";
+
+      // Month + day => "Nov 11"
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const month = monthNames[d.getMonth()];
+      const day = d.getDate();
+
+      // Time => "12.55PM"
+      let hours = d.getHours();
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+      const suffix = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12; // convert 0–23 to 1–12
+
+      const time = `${hours}.${minutes}${suffix}`;
+
+      // Final: "Nov 11, 12.55PM"
+      return `${month} ${day}, ${time}`;
+    } catch {
+      return dt || "";
+    }
+  };
 
   return (
     <div className="c_admin-page">
@@ -101,29 +125,29 @@ export default function AdminTeams() {
           </div>
 
           <div className="c_admin-tbody">
-            {filtered.map((team,index) => (
+            {filtered.map((team, index) => (
               <div key={team.id} className="c_admin-rowline">
                 <div className="c_admin-grid">
                   <div className="c_admin-cell"><code className="c_admin-code">{index + 1}</code></div>
-                  <div className="c_admin-cell">{fmt(team.created_at)   }</div>
+                  <div className="c_admin-cell">{fmt(team.created_at)}</div>
                   <div className="c_admin-cell c--actions">
-                    <button className="c_admin-btn c_admin-btn--rost" onClick={() => setModalTeam(team)}>
+                    <button className="c_admin-btn c_admin-btn" onClick={() => setModalTeam(team)}>
                       View members
                     </button>
                   </div>
                   <div>
-                     {solutionsByTeam[team.id] && (
-                    <button
-                      className="c_admin-btn c_admin-btn--rost"
-                      style={{ marginLeft: 8 }}
-                      onClick={() => setModalSolution(solutionsByTeam[team.id])}
-                    >
-                      View Solution
-                    </button>
-                  )}
+                    {solutionsByTeam[team.id] && (
+                      <button
+                        className="c_admin-btn c_admin-btn--rost"
+                        style={{ marginLeft: 8 }}
+                        onClick={() => setModalSolution(solutionsByTeam[team.id])}
+                      >
+                        View Solution
+                      </button>
+                    )}
                   </div>
                 </div>
-               
+
               </div>
             ))}
           </div>
