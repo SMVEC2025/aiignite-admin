@@ -30,12 +30,9 @@ $c-danger: #ef4444 !default; // Keep danger color
 .c_admin-card {
   width: 100%;
   max-width: 920px;
-  background: $c-card;
-  border: 1px solid $c-border;
   border-radius: 16px;
   padding: 20px;
   // Adjusted shadow for a light background
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
 .c_admin-login {
