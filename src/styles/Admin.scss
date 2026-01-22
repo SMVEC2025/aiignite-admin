@@ -114,15 +114,17 @@ $c-danger: #ef4444 !default; // Keep danger color
     color: rgba($c-text, 0.45); // Darkened placeholder text
   }
 }
+
 // Adjusted SVG fill for date picker to be dark
 input[type="date"]::-webkit-calendar-picker-indicator {
-   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'><path d='M7 10h5v5H7zM3 4h1V2h2v2h10V2h2v2h1a2 2 0 012 2v14a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2zm0 16h18V8H3v12z'/> </svg>") no-repeat center;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'><path d='M7 10h5v5H7zM3 4h1V2h2v2h10V2h2v2h1a2 2 0 012 2v14a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2zm0 16h18V8H3v12z'/> </svg>") no-repeat center;
   color: transparent;
   opacity: 1;
   width: 20px;
   height: 20px;
   cursor: pointer;
 }
+
 // Adjusted SVG fill for time picker to be dark
 input[type="time"]::-webkit-calendar-picker-indicator {
   background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333333'><path d='M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1zm0 20a9 9 0 1 1 9-9 9 9 0 0 1-9 9zm.5-14h-1v6l5.2 3.1.5-.8-4.7-2.8z'/></svg>") no-repeat center;
@@ -132,6 +134,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   height: 20px;
   cursor: pointer;
 }
+
 .c_admin-check {
   display: inline-flex;
   align-items: center;
@@ -174,14 +177,23 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   background: transparent;
   border: 1px solid $c-border;
   color: $c-text;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
 }
-.c_admin-btn-reload{
+
+.c_admin-btn--ghost:hover {
+  background: $c-primary;
+  border-color: $c-primary;
+  color: #fff;
+}
+
+.c_admin-btn-reload {
   background: transparent;
   color: $c-dim; // Darkened text
   border: none;
   margin-left: 10px;
   cursor: pointer;
 }
+
 .c_admin-btn--rost {
   background: transparent;
   border: none;
@@ -189,18 +201,21 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   text-decoration: underline;
   text-underline-offset: 5px;
   text-decoration-color: rgba(0, 0, 0, 0.15); // Darkened underline color
-  &:hover{
+
+  &:hover {
     color: $c-primary;
-    background:transparent;
+    background: transparent;
     border: none;
   }
-  
+
 }
-#log-out{
+
+#log-out {
   position: absolute;
   top: 10px;
   right: 10px;
-  &:hover{
+
+  &:hover {
     background: transparent;
     border: none;
     color: $c-primary;
@@ -408,15 +423,120 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   overflow-wrap: anywhere;
 }
 
+.c_admin-page--solutions .c_admin-title {
+  text-align: left;
+}
+
+.c_admin-row--space {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.c_admin-table-wrap {
+  margin-top: 14px;
+  border-radius: 14px;
+  overflow: auto;
+}
+
+.c_admin-table--clean {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 720px;
+
+  th,
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid $c-border;
+    font-size: 13px;
+    vertical-align: middle;
+    text-align: left;
+  }
+
+  th {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $c-dim;
+    background: #fafbfc;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  tr:hover td {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr.is-shortlisted td {
+    background: rgba(34, 197, 94, 0.08);
+    box-shadow: inset 4px 0 0 rgba(34, 197, 94, 0.65);
+  }
+
+  tr.is-shortlisted:hover td {
+    background: rgba(34, 197, 94, 0.12);
+  }
+}
+
+.c_admin-cell--center {
+  text-align: center;
+}
+
 /* Table layout */
 .c_admin-table {
   margin-top: 8px;
+}
+
+.c_member-cards {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.c_member-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid $c-border;
+  border-radius: 12px;
+  background: $c-card;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.c_member-card__name {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.c_member-card__email {
+  font-size: 12px;
+  color: $c-dim;
+  overflow-wrap: anywhere;
+}
+
+.c_admin-table--members {
+  overflow-x: auto;
+}
+
+.c_admin-table--members .c_admin-grid--members {
+  min-width: 980px;
 }
 
 .c_admin-grid {
   display: grid;
   gap: 12px;
   align-items: center;
+}
+
+.c_admin-grid--members {
+  grid-template-columns: minmax(160px, 2fr) minmax(220px, 2fr) minmax(130px, 1.2fr) minmax(160px, 1.4fr) minmax(170px, 1.4fr) minmax(140px, 1.2fr) minmax(160px, 1.2fr) 120px;
 }
 
 .c_admin-thead {

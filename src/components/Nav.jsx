@@ -20,6 +20,7 @@ export default function Nav() {
         <NavLink to="/mentors" className="c_admin-link">Mentors</NavLink>
         <NavLink to="/mentoring-sessions" className="c_admin-link">Mentors-sessions</NavLink>
         <NavLink to="/sessions" className="c_admin-link">Sessions</NavLink>
+        <NavLink to="/final-solutions" className="c_admin-link">Final Solutions</NavLink>
       </div>
       <button id='log-out' style={{ border: 'none' }} className="c_admin-btn c_admin-btn--ghost" onClick={signOut}><LogOut size={20} /></button>
     </nav>

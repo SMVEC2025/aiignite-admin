@@ -16,6 +16,7 @@ import Sessions from './pages/Sessions';
 import PushNotification from './pages/PushNotification';
 import Mentors from './pages/Mentors';
 import MentoringSessions from './pages/MentoringSessions';
+import FinalSolutions from './pages/FinalSolutions';
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
                     <Route path="/teams/:teamId/members/:memberId" element={<MemberDetail />} />
                     <Route path="/sessions" element={<Sessions />} />
                     <Route path="/push-notification" element={<PushNotification />} />
+                    <Route path="/final-solutions" element={<FinalSolutions />} />
 
                   </Routes>
                 </main>

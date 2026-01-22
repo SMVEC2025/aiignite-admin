@@ -47,13 +47,7 @@ export default function TeamDetail() {
     if (q.trim()) {
       const like = `%${q.trim()}%`;
       query = query.or([
-        `member_name.ilike.${like}`,
-        `member_email.ilike.${like}`,
-        `member_phone.ilike.${like}`,
-        `state_name.ilike.${like}`,
-        `city_name.ilike.${like}`,
-        `institute_name.ilike.${like}`,
-        `preferred_track.ilike.${like}`
+        `member_name.ilike.${like}`
       ].join(','));
     }
 
@@ -104,11 +98,11 @@ export default function TeamDetail() {
         <div className="c_admin-grow" />
         <input
           className="c_admin-input"
-          placeholder="Search member name/email/phone/state/city/institute/track"
+          placeholder="Search member name"
           value={q}
           onChange={e => setQ(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && loadMembers()}
-          style={{ maxWidth: 420 }}
+          style={{ maxWidth: 320 }}
         />
         <button className="c_admin-btn" onClick={loadMembers}>Search</button>
       </div>
@@ -118,34 +112,26 @@ export default function TeamDetail() {
       ) : members.length === 0 ? (
         <p className="c_admin-dim">No members found for this team.</p>
       ) : (
-        <div className="c_admin-table">
-          <div className="c_admin-thead">
-            <div>Name</div><div>Email</div><div>Phone</div><div>Location</div>
-            <div>Student</div><div>Track</div><div>Joined</div><div>Action</div>
-          </div>
-          <div className="c_admin-tbody">
-            {members.map(m => (
-              <div key={m.member_user_id} className="c_admin-rowline">
-                <div><b>{m.member_name}</b></div>
-                <div>{m.member_email}</div>
-                <div>{m.member_phone}</div>
-                <div>{[m.city_name, m.state_name].filter(Boolean).join(', ')}</div>
-                <div>{m.is_student ? `Yes${m.institute_name ? ` (${m.institute_name})` : ''}` : 'No'}</div>
-                <div>{m.preferred_track || '—'}</div>
-                <div>{fmt(m.joined_at)}</div>
-                <div>
-                  <Link
-                    to={`/teams/${teamId}/members/${encodeURIComponent(m.member_user_id)}`}
-                    className="c_admin-btn c_admin-btn--ghost"
-                  >
-                    View
-                  </Link>
-                </div>
+        <div className="c_member-cards">
+          {members.map(m => (
+            <div key={m.member_user_id} className="c_member-card">
+              <div>
+                <div className="c_member-card__name">{m.member_name || '—'}</div>
+                <div className="c_member-card__email">{m.member_email || '—'}</div>
               </div>
-            ))}
-          </div>
+              <Link
+                to={`/teams/${teamId}/members/${encodeURIComponent(m.member_user_id)}`}
+                className="c_admin-btn c_admin-btn--ghost"
+              >
+                View
+              </Link>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
+
+
+

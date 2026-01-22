@@ -1,6 +1,59 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { RotateCw } from 'lucide-react';
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildExcelHtml(headers, rows) {
+  const head = `<tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
+  const body = rows.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('');
+  return `<!doctype html><html><head><meta charset="UTF-8"></head><body><table>${head}${body}</table></body></html>`;
+}
+
+function buildSolutionsExcelHtml(headers, rows) {
+  const head = `<tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
+  const body = rows.map(r => {
+    const tds = r.map(cell => {
+      if (!cell || typeof cell !== 'object') return `<td>${escapeHtml(cell ?? '')}</td>`;
+      const text = escapeHtml(cell.text ?? '');
+      if (cell.href) {
+        const href = escapeHtml(cell.href);
+        return `<td><a href="${href}">${text || href}</a></td>`;
+      }
+      return `<td>${text}</td>`;
+    }).join('');
+    return `<tr>${tds}</tr>`;
+  }).join('');
+  return `<!doctype html><html><head><meta charset="UTF-8">
+  <style>
+    table { border-collapse: collapse; }
+    th, td { text-align: left; vertical-align: top; }
+  </style>
+  </head><body><table>${head}${body}</table></body></html>`;
+}
+
+function buildPdfHtml(headers, rows) {
+  const head = `<tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
+  const body = rows.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('');
+  return `<!doctype html><html><head><meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; text-align: left; }
+    th { background: #f4f4f4; }
+  </style>
+  </head><body><h1>Submitted Solutions</h1><table>${head}${body}</table></body></html>`;
+}
+
 export default function AdminTeams() {
   const [q, setQ] = useState('');
   const [items, setItems] = useState([]);
@@ -95,11 +148,106 @@ export default function AdminTeams() {
     }
   };
 
+  const solutionsList = useMemo(() => {
+    return Object.values(solutionsByTeam || {}).filter(Boolean);
+  }, [solutionsByTeam]);
+
+  const teamMemberMeta = useMemo(() => {
+    const map = {};
+    (items || []).forEach(t => {
+      const first = Array.isArray(t.team_members) && t.team_members.length
+        ? t.team_members[0]
+        : null;
+      if (t.id) {
+        map[t.id] = {
+          institute_name: first?.institute_name || '',
+          state_name: first?.state_name || ''
+        };
+      }
+    });
+    return map;
+  }, [items]);
+
+  const exportSolutionsExcel = () => {
+    if (loading) return;
+    if (!solutionsList.length) {
+      setMsg('No submitted solutions to export.');
+      return;
+    }
+
+    const headers = [
+      'Team ID',
+      'Description',
+      'GitHub URL',
+      'Documentation URL',
+      'Video URL',
+      'Project URL',
+      'Institute Name',
+      'State Name',
+      'Submitted At (Date)'
+    ];
+    const rows = solutionsList.map(s => ([
+      { text: s.team_id || '' },
+      { text: s.description || '' },
+      { text: s.github_url || '', href: s.github_url || '' },
+      { text: s.doc_url || '', href: s.doc_url || '' },
+      { text: s.video_url || '', href: s.video_url || '' },
+      { text: s.project_url || '', href: s.project_url || '' },
+      { text: teamMemberMeta[s.team_id]?.institute_name || '' },
+      { text: teamMemberMeta[s.team_id]?.state_name || '' },
+      { text: s.submitted_at ? new Date(s.submitted_at).toLocaleDateString('en-IN') : '' }
+    ]));
+
+    const html = buildSolutionsExcelHtml(headers, rows);
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    a.href = url;
+    a.download = `submitted_solutions_${stamp}.xls`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportSolutionsPdf = () => {
+    if (loading) return;
+    if (!solutionsList.length) {
+      setMsg('No submitted solutions to export.');
+      return;
+    }
+
+    const headers = ['Team ID', 'Submitted At'];
+    const rows = solutionsList.map(s => [
+      s.team_id || '',
+      s.submitted_at ? new Date(s.submitted_at).toLocaleString('en-IN') : ''
+    ]);
+
+    const html = buildPdfHtml(headers, rows);
+    const win = window.open('', '_blank');
+    if (!win) {
+      setMsg('Popup blocked. Please allow popups to export PDF.');
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
   return (
     <div className="c_admin-page">
       <div className="c_admin-row">
         <h2 className="c_admin-title">Teams</h2>
         <div className="c_admin-grow" />
+        <button className="c_admin-btn" onClick={exportSolutionsExcel} disabled={loading || solutionsList.length === 0}>
+          Export Excel
+        </button>
+        <button className="c_admin-btn" onClick={exportSolutionsPdf} style={{ marginLeft: 8 }} disabled={loading || solutionsList.length === 0}>
+          Export PDF
+        </button>
         <input
           className="c_admin-input"
           placeholder="Search team id / created_by / member name/email/phone"
@@ -134,6 +282,13 @@ export default function AdminTeams() {
                     <button className="c_admin-btn c_admin-btn" onClick={() => setModalTeam(team)}>
                       View members
                     </button>
+                    <Link
+                      className="c_admin-btn c_admin-btn--ghost"
+                      style={{ marginLeft: 8 }}
+                      to={`/teams/${encodeURIComponent(team.id)}`}
+                    >
+                      Team members
+                    </Link>
                   </div>
                   <div>
                     {solutionsByTeam[team.id] && (
