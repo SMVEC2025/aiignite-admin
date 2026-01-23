@@ -13,12 +13,12 @@ export default function Login() {
   const [msg, setMsg] = useState(loc.state?.err || '');
 
   useEffect(() => {
-    // If already logged in & admin, go to dashboard
+    // If already logged in & admin, go to final solutions
     (async () => {
       const { data } = await supabase.auth.getSession();
       const s = data?.session ?? null;
       if (s && (await ensureAdminOrSignOut())) {
-        nav('/', { replace: true });
+        nav('/final-solutions', { replace: true });
       }
     })();
   }, [nav]);
@@ -32,7 +32,7 @@ export default function Login() {
     const ok = await ensureAdminOrSignOut();
     if (!ok) return setMsg('Not authorized');
 
-    nav('/', { replace: true });
+    nav('/final-solutions', { replace: true });
   }
 
   return (
