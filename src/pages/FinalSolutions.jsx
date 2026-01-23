@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const solutionFields = [
   'id',
@@ -32,6 +35,25 @@ const linkFields = [
   { key: 'github_repo_link', label: 'Open GitHub Repo' },
   { key: 'document_link', label: 'Open Document' },
 ];
+
+const exportExtraFields = [
+  'team_members_names',
+  'team_members_phones',
+  'team_members_cities',
+  'team_members_institutions',
+];
+
+function formatExportValue(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function toJoinedList(values) {
+  const out = values.filter(Boolean);
+  if (!out.length) return '';
+  return [...new Set(out.map(String))].join(', ');
+}
 
 function formatIndiaDateTime(value) {
   if (!value) return '';
@@ -81,6 +103,7 @@ export default function FinalSolutions() {
   const [activeRow, setActiveRow] = useState(null);
   const [shortlistingId, setShortlistingId] = useState(null);
   const [showShortlistedOnly, setShowShortlistedOnly] = useState(false);
+  const [exporting, setExporting] = useState('');
 
   async function load() {
     setLoading(true);
@@ -135,13 +158,17 @@ export default function FinalSolutions() {
   }, [rows]);
 
   const allSelected = useMemo(
-    () => rows.length > 0 && selected.length === rows.length,
-    [rows, selected]
+    () => visibleRows.length > 0 && visibleRows.every((row) => selected.includes(row.id)),
+    [visibleRows, selected]
   );
 
   function toggleAll(checked) {
-    if (checked) setSelected(rows.map((row) => row.id));
-    else setSelected([]);
+    const visibleIds = visibleRows.map((row) => row.id);
+    if (checked) {
+      setSelected((prev) => [...new Set([...prev, ...visibleIds])]);
+    } else {
+      setSelected((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    }
   }
 
   function toggleOne(id) {
@@ -149,6 +176,81 @@ export default function FinalSolutions() {
   }
 
   const visibleRows = showShortlistedOnly ? rows.filter((row) => row.is_shortlisted) : rows;
+  const selectedRows = useMemo(
+    () => rows.filter((row) => selected.includes(row.id)),
+    [rows, selected]
+  );
+
+  async function exportSelected(format) {
+    if (selectedRows.length === 0) return;
+    setExporting(format);
+    setMsg('');
+    try {
+      const teamIds = [...new Set(selectedRows.map((r) => r.team_id).filter(Boolean))];
+      let teamMap = new Map();
+      if (teamIds.length) {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('team_id, member_name, member_phone, city_name, institute_name')
+          .in('team_id', teamIds);
+        if (error) throw error;
+        teamMap = data.reduce((acc, row) => {
+          if (!acc.has(row.team_id)) acc.set(row.team_id, []);
+          acc.get(row.team_id).push(row);
+          return acc;
+        }, new Map());
+      }
+
+      const exportFields = [...solutionFields, ...exportExtraFields];
+      const pdfFields = [
+        'team_id',
+        'team_members_names',
+        'team_members_phones',
+        'team_members_cities',
+        'team_members_institutions',
+      ];
+      const exportRows = selectedRows.map((row) => {
+        const members = teamMap.get(row.team_id) || [];
+        const withMembers = {
+          ...row,
+          team_members_names: toJoinedList(members.map((m) => m.member_name)),
+          team_members_phones: toJoinedList(members.map((m) => m.member_phone)),
+          team_members_cities: toJoinedList(members.map((m) => m.city_name)),
+          team_members_institutions: toJoinedList(members.map((m) => m.institute_name)),
+        };
+        return exportFields.reduce((acc, field) => {
+          acc[field] = formatExportValue(withMembers[field]);
+          return acc;
+        }, {});
+      });
+
+      if (format === 'xlsx') {
+        const worksheet = XLSX.utils.json_to_sheet(exportRows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Final Solutions');
+        XLSX.writeFile(workbook, 'final-solutions-selected.xlsx');
+        return;
+      }
+      if (format === 'pdf') {
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+        const head = [pdfFields.map((f) => f.replace(/_/g, ' '))];
+        const body = exportRows.map((row) => pdfFields.map((f) => formatExportValue(row[f])));
+        doc.text('Final Solutions (Selected)', 40, 40);
+        autoTable(doc, {
+          head,
+          body,
+          startY: 60,
+          styles: { fontSize: 8, cellPadding: 4 },
+          headStyles: { fillColor: [245, 247, 248], textColor: 20 },
+        });
+        doc.save('final-solutions-selected.pdf');
+      }
+    } catch (err) {
+      setMsg(err?.message || 'Failed to export.');
+    } finally {
+      setExporting('');
+    }
+  }
 
   return (
     <div className="c_admin-page c_admin-page--solutions">
@@ -165,6 +267,23 @@ export default function FinalSolutions() {
             {showShortlistedOnly ? 'Show all' : 'View only shortlisted'}
           </button>
           <button className="c_admin-btn c_admin-btn--ghost" onClick={load}>Reload</button>
+          <span className="c_admin-dim" style={{ marginLeft: 8 }}>
+            Selected: {selected.filter((id) => visibleRows.some((r) => r.id === id)).length}
+          </span>
+          <button
+            className="c_admin-btn c_admin-btn--ghost"
+            onClick={() => exportSelected('xlsx')}
+            disabled={selected.length === 0 || exporting}
+          >
+            {exporting === 'xlsx' ? 'Exportingâ€¦' : 'Export Excel'}
+          </button>
+          <button
+            className="c_admin-btn c_admin-btn--ghost"
+            onClick={() => exportSelected('pdf')}
+            disabled={selected.length === 0 || exporting}
+          >
+            {exporting === 'pdf' ? 'Exportingâ€¦' : 'Export PDF'}
+          </button>
         </div>
       </div>
 
