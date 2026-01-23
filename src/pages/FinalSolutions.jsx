@@ -157,6 +157,8 @@ export default function FinalSolutions() {
     setSelected((prev) => prev.filter((id) => rows.some((row) => row.id === id)));
   }, [rows]);
 
+  const visibleRows = showShortlistedOnly ? rows.filter((row) => row.is_shortlisted) : rows;
+
   const allSelected = useMemo(
     () => visibleRows.length > 0 && visibleRows.every((row) => selected.includes(row.id)),
     [visibleRows, selected]
@@ -175,7 +177,6 @@ export default function FinalSolutions() {
     setSelected((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   }
 
-  const visibleRows = showShortlistedOnly ? rows.filter((row) => row.is_shortlisted) : rows;
   const selectedRows = useMemo(
     () => rows.filter((row) => selected.includes(row.id)),
     [rows, selected]
