@@ -51,6 +51,7 @@ const problemStatements = [
   'AI-Driven Automated Folding System',
   'Multilingual InsurTech Platform',
   "Women's Biological Cycle & Energy Planning",
+  'Computer Vision for Fruit Spoilage Detection',
 ];
 
 function formatExportValue(value) {
