@@ -43,6 +43,16 @@ const exportExtraFields = [
   'team_members_institutions',
 ];
 
+const problemStatements = [
+  'AI-Powered Personalized Learning Platform',
+  'AI-Powered Career Navigation System',
+  'AI-Enabled Fabric Identification & Care System',
+  'AI-Assisted Smart Ironing System',
+  'AI-Driven Automated Folding System',
+  'Multilingual InsurTech Platform',
+  "Women's Biological Cycle & Energy Planning",
+];
+
 function formatExportValue(value) {
   if (value === null || value === undefined) return '';
   if (typeof value === 'object') return JSON.stringify(value);
@@ -104,6 +114,7 @@ export default function FinalSolutions() {
   const [shortlistingId, setShortlistingId] = useState(null);
   const [showShortlistedOnly, setShowShortlistedOnly] = useState(false);
   const [exporting, setExporting] = useState('');
+  const [problemFilter, setProblemFilter] = useState('');
 
   async function load() {
     setLoading(true);
@@ -157,7 +168,16 @@ export default function FinalSolutions() {
     setSelected((prev) => prev.filter((id) => rows.some((row) => row.id === id)));
   }, [rows]);
 
-  const visibleRows = showShortlistedOnly ? rows.filter((row) => row.is_shortlisted) : rows;
+  const visibleRows = useMemo(() => {
+    let filtered = rows;
+    if (showShortlistedOnly) {
+      filtered = filtered.filter((row) => row.is_shortlisted);
+    }
+    if (problemFilter) {
+      filtered = filtered.filter((row) => row.problem_statement === problemFilter);
+    }
+    return filtered;
+  }, [rows, showShortlistedOnly, problemFilter]);
 
   const allSelected = useMemo(
     () => visibleRows.length > 0 && visibleRows.every((row) => selected.includes(row.id)),
@@ -261,13 +281,23 @@ export default function FinalSolutions() {
           <div className="c_admin-dim">Project submissions from Supabase.</div>
         </div>
         <div className="c_admin-row" style={{ gap: 8 }}>
+          <select
+            className="c_admin-input"
+            value={problemFilter}
+            onChange={(e) => setProblemFilter(e.target.value)}
+            style={{ minWidth: 260 }}
+          >
+            <option value="">All problem statements</option>
+            {problemStatements.map((statement) => (
+              <option key={statement} value={statement}>{statement}</option>
+            ))}
+          </select>
           <button
             className="c_admin-btn c_admin-btn--ghost"
             onClick={() => setShowShortlistedOnly((prev) => !prev)}
           >
             {showShortlistedOnly ? 'Show all' : 'View only shortlisted'}
           </button>
-          <button className="c_admin-btn c_admin-btn--ghost" onClick={load}>Reload</button>
           <span className="c_admin-dim" style={{ marginLeft: 8 }}>
             Selected: {selected.filter((id) => visibleRows.some((r) => r.id === id)).length}
           </span>

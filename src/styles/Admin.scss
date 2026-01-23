@@ -148,6 +148,10 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .c_admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
   appearance: none;
   border: none;
   background: $c-primary;
@@ -158,6 +162,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   font-size: 14px;
   cursor: pointer;
   transition: transform .04s ease, background-color .15s ease;
+  text-decoration: none;
 
   &:hover {
     background: $c-primary-600;
